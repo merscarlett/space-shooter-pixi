@@ -1,10 +1,16 @@
+import { Container } from 'pixi.js';
 import { createBackground } from '../game/background';
+import { createLevelIntro } from '../game/intro';
 import { createHUD } from '../game/hud';
 import { createPlayer } from '../game/player';
 import { createBullet } from '../game/bullet';
 import { createBoss } from '../game/boss';
 import { setupPlayerControls } from '../game/controls';
-import { isColliding, isCollidingTriangle, updateBulletsAndCollisions } from '../game/collision';
+import {
+  isColliding,
+  isCollidingTriangle,
+  updateBulletsAndCollisions,
+} from '../game/collision';
 import { showMenu } from '../game/menu';
 import { startAsteroidLevel } from './asteroidLevel';
 
@@ -12,10 +18,19 @@ export async function startBossLevel(app) {
   app.stage.removeChildren();
   await createBackground(app);
 
+  const showIntro = createLevelIntro(app);
+  await showIntro('BOSS LEVEL');
+
   const maxBullets = 10;
   const timeLeft = 60;
-  const { timerText, getRemainingTime, updateBullets } =
-    createHUD(app, maxBullets, timeLeft);
+  const { timerText, getRemainingTime, updateBullets } = createHUD(
+    app,
+    maxBullets,
+    timeLeft
+  );
+
+  const bossBulletContainer = new Container();
+  app.stage.addChild(bossBulletContainer);
 
   const player = await createPlayer(app);
   const bullets = [];
@@ -35,6 +50,7 @@ export async function startBossLevel(app) {
   );
 
   const boss = await createBoss(app);
+  boss.sprite.isBoss = true;
   const bossBullets = [];
 
   const bossShootInterval = setInterval(() => {
@@ -44,7 +60,8 @@ export async function startBossLevel(app) {
         boss.sprite.x,
         boss.sprite.y + boss.sprite.height / 2,
         5
-      ); 
+      );
+      bossBulletContainer.addChild(bullet.sprite);
       bossBullets.push(bullet);
     }
   }, 2000);
@@ -70,11 +87,38 @@ export async function startBossLevel(app) {
       [boss],
       (b) => {
         b.hit();
-        const originalTint = b.sprite.tint;
-        b.sprite.tint = 0xff0000;
-        setTimeout(() => {
-          if (!b.sprite.destroyed) b.sprite.tint = originalTint;
-        }, 100);
+
+        const sprite = b.sprite;
+        if (sprite.hitAnim) return;
+
+        const originalScale = sprite.scale.x;
+        const originalY = sprite.y;
+
+        let animFrame = 0;
+        const totalFrames = 8;
+        sprite.hitAnim = true;
+
+        const tickerCallback = (delta) => {
+          animFrame++;
+          sprite.y =
+            originalY + Math.sin((animFrame / totalFrames) * Math.PI) * -10;
+          const scaleFactor =
+            1 + Math.sin((animFrame / totalFrames) * Math.PI) * 0.1;
+          sprite.scale.set(originalScale * scaleFactor);
+
+          if (animFrame % 2 === 0) sprite.tint = 0xff0000;
+          else sprite.tint = 0xffffff;
+
+          if (animFrame >= totalFrames) {
+            sprite.y = originalY;
+            sprite.scale.set(originalScale);
+            sprite.tint = 0xffffff;
+            app.ticker.remove(tickerCallback);
+            sprite.hitAnim = false;
+          }
+        };
+
+        app.ticker.add(tickerCallback);
 
         if (b.getHP() <= 0) {
           gameEnded.value = true;
@@ -89,7 +133,7 @@ export async function startBossLevel(app) {
       for (let j = bossBullets.length - 1; j >= 0; j--) {
         if (isColliding(bullets[i].sprite, bossBullets[j].sprite)) {
           app.stage.removeChild(bullets[i].sprite);
-          app.stage.removeChild(bossBullets[j].sprite);
+          bossBulletContainer.removeChild(bossBullets[j].sprite);
           bullets.splice(i, 1);
           bossBullets.splice(j, 1);
           break;
@@ -107,12 +151,16 @@ export async function startBossLevel(app) {
       }
       const alive = bullet.update();
       if (!alive) {
-        app.stage.removeChild(bullet.sprite);
+        bossBulletContainer.removeChild(bullet.sprite);
         bossBullets.splice(i, 1);
       }
     }
 
-    if (shotsFired.value >= maxBullets && boss.getHP() > 0) {
+    if (
+      shotsFired.value >= maxBullets &&
+      bullets.length === 0 &&
+      boss.getHP() > 0
+    ) {
       gameEnded.value = true;
       clearInterval(bossShootInterval);
       showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));

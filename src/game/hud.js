@@ -1,12 +1,15 @@
-import { Text } from 'pixi.js';
+import { Text, Container } from 'pixi.js';
 
 export function createHUD(app, maxBullets, timeLeft) {
+  const hudContainer = new Container();
+  app.stage.addChild(hudContainer);
+
   const bulletsCounter = new Text({
     text: `Bullets: ${maxBullets} / ${maxBullets}`,
     style: {
       fill: '#1a3892ff',
-      stroke: '#ffffff',
-      strokeThickness: 2,
+      stroke: '#ffffffff',
+      strokeThickness: 3,
       fontSize: 20,
       fontWeight: 'bold',
       fontFamily: 'Courier New',
@@ -14,14 +17,14 @@ export function createHUD(app, maxBullets, timeLeft) {
   });
   bulletsCounter.x = 20;
   bulletsCounter.y = 20;
-  app.stage.addChild(bulletsCounter);
+  hudContainer.addChild(bulletsCounter);
 
   const timerText = new Text({
     text: `Time: ${timeLeft}`,
     style: {
       fill: '#1a3892ff',
-      stroke: '#ffffff',
-      strokeThickness: 2,
+      stroke: '#ffffffff',
+      strokeThickness: 3,
       fontSize: 20,
       fontWeight: 'bold',
       fontFamily: 'Courier New',
@@ -29,7 +32,7 @@ export function createHUD(app, maxBullets, timeLeft) {
   });
   timerText.x = app.screen.width - timerText.width - 20;
   timerText.y = 20;
-  app.stage.addChild(timerText);
+  hudContainer.addChild(timerText);
 
   const startTime = performance.now();
 
@@ -44,5 +47,18 @@ export function createHUD(app, maxBullets, timeLeft) {
     bulletsCounter.text = `Bullets: ${maxBullets - shotsFired} / ${maxBullets}`;
   }
 
-  return { bulletsCounter, timerText, getRemainingTime, updateBullets };
+  function removeHUD() {
+    if (hudContainer.parent === app.stage) {
+      app.stage.removeChild(hudContainer);
+    }
+  }
+
+  return {
+    bulletsCounter,
+    timerText,
+    getRemainingTime,
+    updateBullets,
+    hudContainer,
+    removeHUD,
+  };
 }

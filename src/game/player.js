@@ -1,16 +1,19 @@
 import { Assets, Sprite } from 'pixi.js';
 
-export async function createPlayer(app) {
-  const texture = await Assets.load('/assets/images/spaceship.png');
-  const sprite = new Sprite(texture);
+let cachedPlayerTexture = null;
 
+export async function createPlayer(app) {
+  if (!cachedPlayerTexture) {
+    cachedPlayerTexture = await Assets.load('/assets/images/spaceship.png');
+  }
+
+  const sprite = new Sprite(cachedPlayerTexture);
   sprite.anchor.set(0.5);
   sprite.scale.set(0.12);
-
   sprite.x = app.screen.width / 2;
   sprite.y = app.screen.height - sprite.height / 2 - 10;
-
   app.stage.addChild(sprite);
+
   const speed = 15;
 
   return {

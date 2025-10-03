@@ -1,13 +1,16 @@
-import { Graphics } from 'pixi.js';
+import { Graphics, BlurFilter } from 'pixi.js';
 
-export function createBullet(app, x, y, speedY = -8) {
-  const bullet = new Graphics().circle(0, 0, 5).fill('red');
+export function createBullet(app, x, y, speedY = -5) {
+  const bullet = new Graphics()
+    .circle(0, 0, 5)
+    .fill('white')
+    .stroke({ width: 3, color: 0xcc0000 });
 
   bullet.x = x;
   bullet.y = y;
-
+  bullet.filters = [new BlurFilter({ strength: 2 })];
   app.stage.addChild(bullet);
-
+  
   return {
     sprite: bullet,
     update: () => {

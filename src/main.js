@@ -13,4 +13,3 @@ let app;
   await createBackground(app);
   showMenu(app, 'SPACE SHOOTER', 'Start Game', () => startAsteroidLevel(app));
 })();
-

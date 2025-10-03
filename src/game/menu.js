@@ -20,7 +20,7 @@ export function showMenu(app, message, buttonText, onStart) {
   app.stage.addChild(title);
   ui.push(title);
 
-  const button = new Graphics().roundRect(0, 0, 250, 60, 10).fill(0x1a3892);
+  const button = new Graphics().roundRect(0, 0, 250, 60, 8).fill(0x1a3892);
   button.x = app.screen.width / 2 - 125;
   button.y = app.screen.height / 2;
   button.interactive = true;

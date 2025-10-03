@@ -4,7 +4,8 @@ function isColliding(spriteA, spriteB) {
   const distance = Math.sqrt(dx * dx + dy * dy);
   const radiusA = spriteA.width / 2;
   const radiusB = spriteB.width / 2;
-  return distance < radiusA + radiusB;
+  const collisionFactor = spriteB.isBoss ? 1 : 0.6;
+  return distance < (radiusA + radiusB) * collisionFactor;
 }
 
 function pointInTriangle(px, py, a, b, c) {
