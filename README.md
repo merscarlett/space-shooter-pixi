@@ -1,26 +1,27 @@
 # 🚀 Space Shooter (PIXI.js)
 
-Гра-шутер, де гравець керує космічним кораблем і знищує астероїди та босса.  
-Реалізовано з використанням **HTML + JavaScript (ES Modules) + PIXI.js**.
+A shooter game where the player controls a spaceship and destroys asteroids and a boss.
+Built with HTML + JavaScript (ES Modules) + PIXI.js.
 
-## 🎮 Функціонал
-- Корабель рухається лише по горизонталі (← →).
-- Стрільба пробілом.
-- Кулі створюються через `Graphics`.
-- Знищення астероїдів і босса через колізії.
-- Ліміт: **10 пострілів на рівень**.
-- Таймер: **60 секунд** на рівень.
-- 2 рівні:
-  - **Level 1**: астероїди (рандомна розстановка).
-  - **Level 2**: бос (4 HP, шкала життя, стріляє кожні 2 секунди).
-- Повідомлення `YOU WIN` / `YOU LOSE` в кінці гри.
+## 🎮 Features
+- Spaceship moves only horizontally (← →).
+- Shooting with the spacebar.
+- Bullets are created using Graphics.
+- Destroy asteroids and the boss via collisions.
+- Limit: 10 shots per level.
+- Timer: 60 seconds per level.
+- 2 levels:
+  - **Level 1**: Asteroids (random placement).
+  - **Level 2**: Boss (5 HP, health bar, shoots every 2 seconds).
+- End-of-game messages: YOU WIN / YOU LOSE.
+- Game resolution: 1280 × 720 pixels.
 
-## 📂 Структура проєкту
+## 📂 Project Structure
 ```
 project-root/
-├─ index.html          # Основна сторінка (точка входу)
+├─ index.html          # Main page (entry point)
 ├─ src/
-│  ├─ main.js          # Точка входу JS
+│  ├─ main.js          # JS entry point
 │  ├─ game/
 │  │  ├─ background.js
 │  │  ├─ menu.js
@@ -36,27 +37,27 @@ project-root/
 │  └─ levels/
 │     ├─ asteroidLevel.js
 │     └─ bossLevel.js
-├─ assets/             # Графіка та інші ресурси
-│  └─ style.css         # Стилі
+├─ assets/              # Graphics and other resources
+│  └─ style.css         # Styles
 ├─ package.json
 ├─ package-lock.json
 └─ vite.config.js
 
 ```
-## Як запустити проєкт
+## How to Run
 
 1. git clone https://github.com/merscarlett/space-shooter-pixi.git
 2. cd space-shooter-pixi
 3. npm install
 4. npm run dev
 
-## Скріншоти з гри
+## Game Screenshots
 
-### Головне меню
-![Головне меню](https://github.com/user-attachments/assets/88ddc783-d339-4e4c-af3e-9b0e9226c756)
+### Main Menu
+![Main Menu](https://github.com/user-attachments/assets/88ddc783-d339-4e4c-af3e-9b0e9226c756)
 
-### Рівень з астероїдами
-![Рівень 1](https://github.com/user-attachments/assets/fa4cbcdc-4137-44c7-bf1d-b9b14cc641a3)
+### Asteroid Level
+![Asteroid Level](https://github.com/user-attachments/assets/745a6e50-ce5f-4fe3-bd10-5293a5994503)
 
-### Рівень з босом
-![Бос битва](https://github.com/user-attachments/assets/f15c6c15-3347-4ca4-b89d-447c975a48e2)
+### Boss Fight
+![Boss Fight](https://github.com/user-attachments/assets/f15c6c15-3347-4ca4-b89d-447c975a48e2)
