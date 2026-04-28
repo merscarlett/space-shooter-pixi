@@ -54,10 +54,10 @@ project-root/
 ## Game Screenshots
 
 ### Main Menu
-![Main Menu](https://github.com/user-attachments/assets/88ddc783-d339-4e4c-af3e-9b0e9226c756)
+![Main Menu](https://github.com/user-attachments/assets/7bf6834e-fa3e-43ce-ad59-136f9e05e499)
 
 ### Asteroid Level
-![Asteroid Level](https://github.com/user-attachments/assets/745a6e50-ce5f-4fe3-bd10-5293a5994503)
+![Asteroid Level](https://github.com/user-attachments/assets/8d4d0d47-bea0-465c-a83f-4c749eea0f68)
 
 ### Boss Fight
-![Boss Fight](https://github.com/user-attachments/assets/f15c6c15-3347-4ca4-b89d-447c975a48e2)
+![Boss Fight](https://github.com/user-attachments/assets/a1729e7c-2b27-4d07-802c-6d4cc745495b)
