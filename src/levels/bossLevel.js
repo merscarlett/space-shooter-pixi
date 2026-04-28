@@ -12,18 +12,19 @@ import {
   updateBulletsAndCollisions,
 } from '../game/collision';
 import { showMenu } from '../game/menu';
+import { clearScene, registerSceneCleanup } from '../game/scene';
 import { startAsteroidLevel } from './asteroidLevel';
 
 export async function startBossLevel(app) {
-  app.stage.removeChildren();
-  await createBackground(app);
+  clearScene(app);
+  registerSceneCleanup(app, await createBackground(app));
 
   const showIntro = createLevelIntro(app);
   await showIntro('BOSS LEVEL');
 
   const maxBullets = 10;
   const timeLeft = 60;
-  const { timerText, getRemainingTime, updateBullets } = createHUD(
+  const { getRemainingTime, updateBullets, updateTimer } = createHUD(
     app,
     maxBullets,
     timeLeft
@@ -38,15 +39,18 @@ export async function startBossLevel(app) {
   const shotsFired = { value: 0 };
   const gameEnded = { value: false };
 
-  setupPlayerControls(
+  registerSceneCleanup(
     app,
-    player,
-    bullets,
-    maxBullets,
-    readyToShoot,
-    shotsFired,
-    updateBullets,
-    gameEnded
+    setupPlayerControls(
+      app,
+      player,
+      bullets,
+      maxBullets,
+      readyToShoot,
+      shotsFired,
+      updateBullets,
+      gameEnded
+    )
   );
 
   const boss = await createBoss(app);
@@ -65,32 +69,34 @@ export async function startBossLevel(app) {
       bossBullets.push(bullet);
     }
   }, 2000);
+  registerSceneCleanup(app, () => clearInterval(bossShootInterval));
+
+  const showGameOver = async (message) => {
+    clearScene(app);
+    registerSceneCleanup(app, await createBackground(app));
+    showMenu(app, message, 'New Game', () => startAsteroidLevel(app));
+  };
 
   const tickerCallback = () => {
     if (gameEnded.value) {
-      clearInterval(bossShootInterval);
-      app.ticker.remove(tickerCallback);
       return;
     }
 
     const remaining = getRemainingTime();
-    timerText.text = `Time: ${remaining}`;
+    updateTimer(remaining);
     if (remaining <= 0) {
       gameEnded.value = true;
-      clearInterval(bossShootInterval);
-      showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+      void showGameOver('YOU LOSE');
       return;
     }
 
-    updateBulletsAndCollisions(
-      bullets,
-      [boss],
-      (b) => {
-        b.hit();
+    updateBulletsAndCollisions(bullets, [boss], (b) => {
+      b.hit();
 
-        const sprite = b.sprite;
-        if (sprite.hitAnim) return;
+      const sprite = b.sprite;
+      const isDefeated = b.getHP() <= 0;
 
+      if (!sprite.hitAnim) {
         const originalScale = sprite.scale.x;
         const originalY = sprite.y;
 
@@ -98,7 +104,7 @@ export async function startBossLevel(app) {
         const totalFrames = 8;
         sprite.hitAnim = true;
 
-        const tickerCallback = (delta) => {
+        const tickerCallback = () => {
           animFrame++;
           sprite.y =
             originalY + Math.sin((animFrame / totalFrames) * Math.PI) * -10;
@@ -119,21 +125,21 @@ export async function startBossLevel(app) {
         };
 
         app.ticker.add(tickerCallback);
+        registerSceneCleanup(app, () => app.ticker.remove(tickerCallback));
+      }
 
-        if (b.getHP() <= 0) {
-          gameEnded.value = true;
-          clearInterval(bossShootInterval);
-          showMenu(app, 'YOU WIN', 'New Game', () => startAsteroidLevel(app));
-        }
-      },
-      app
-    );
+      if (isDefeated) {
+        gameEnded.value = true;
+        void showGameOver('YOU WIN');
+      }
+    });
+    if (gameEnded.value) return;
 
     for (let i = bullets.length - 1; i >= 0; i--) {
       for (let j = bossBullets.length - 1; j >= 0; j--) {
         if (isColliding(bullets[i].sprite, bossBullets[j].sprite)) {
-          app.stage.removeChild(bullets[i].sprite);
-          bossBulletContainer.removeChild(bossBullets[j].sprite);
+          bullets[i].sprite.parent?.removeChild(bullets[i].sprite);
+          bossBullets[j].sprite.parent?.removeChild(bossBullets[j].sprite);
           bullets.splice(i, 1);
           bossBullets.splice(j, 1);
           break;
@@ -145,13 +151,11 @@ export async function startBossLevel(app) {
       const bullet = bossBullets[i];
       if (isCollidingTriangle(bullet.sprite, player.sprite)) {
         gameEnded.value = true;
-        clearInterval(bossShootInterval);
-        showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+        void showGameOver('YOU LOSE');
         return;
       }
       const alive = bullet.update();
       if (!alive) {
-        bossBulletContainer.removeChild(bullet.sprite);
         bossBullets.splice(i, 1);
       }
     }
@@ -162,8 +166,7 @@ export async function startBossLevel(app) {
       boss.getHP() > 0
     ) {
       gameEnded.value = true;
-      clearInterval(bossShootInterval);
-      showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+      void showGameOver('YOU LOSE');
       return;
     }
 
@@ -171,4 +174,5 @@ export async function startBossLevel(app) {
   };
 
   app.ticker.add(tickerCallback);
+  registerSceneCleanup(app, () => app.ticker.remove(tickerCallback));
 }

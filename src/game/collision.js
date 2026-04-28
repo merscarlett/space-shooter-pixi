@@ -47,12 +47,15 @@ function isCollidingTriangle(spriteA, spriteB) {
   return false;
 }
 
-function updateBulletsAndCollisions(bullets, targets, onHit, app) {
+function removeSprite(sprite) {
+  sprite.parent?.removeChild(sprite);
+}
+
+function updateBulletsAndCollisions(bullets, targets, onHit) {
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
     const alive = b.update();
     if (!alive) {
-      app.stage.removeChild(b.sprite);
       bullets.splice(i, 1);
       continue;
     }
@@ -61,7 +64,7 @@ function updateBulletsAndCollisions(bullets, targets, onHit, app) {
       const t = targets[j];
       if (isColliding(b.sprite, t.sprite)) {
         onHit(t);
-        app.stage.removeChild(b.sprite);
+        removeSprite(b.sprite);
         bullets.splice(i, 1);
         break;
       }

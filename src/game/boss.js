@@ -58,26 +58,6 @@ export async function createBoss(app) {
   let moveTimer = 0;
   let isMoving = true;
 
-  function update() {
-    moveTimer++;
-    if (moveTimer > 120) {
-      isMoving = Math.random() > 0.5;
-      moveTimer = 0;
-    }
-    if (isMoving) {
-      sprite.x += speedX * direction;
-      if (
-        sprite.x - sprite.width / 2 <= 0 ||
-        sprite.x + sprite.width / 2 >= app.screen.width
-      ) {
-        direction *= -1;
-        sprite.x += speedX * direction;
-      }
-      sprite.y += Math.sin(app.ticker.lastTime / 500) * 0.5;
-    }
-    updateHeartsPosition();
-  }
-
   function hit() {
     if (currentHP > 0) {
       currentHP--;

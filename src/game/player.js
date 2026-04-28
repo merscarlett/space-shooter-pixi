@@ -15,17 +15,22 @@ export async function createPlayer(app) {
   app.stage.addChild(sprite);
 
   const speed = 15;
+  const clampX = (x) =>
+    Math.min(
+      app.screen.width - sprite.width / 2,
+      Math.max(sprite.width / 2, x)
+    );
 
   return {
     sprite,
     moveLeft: () => {
-      sprite.x -= speed;
-      if (sprite.x - sprite.width / 2 < 0) sprite.x = sprite.width / 2;
+      sprite.x = clampX(sprite.x - speed);
     },
     moveRight: () => {
-      sprite.x += speed;
-      if (sprite.x + sprite.width / 2 > app.screen.width)
-        sprite.x = app.screen.width - sprite.width / 2;
+      sprite.x = clampX(sprite.x + speed);
+    },
+    setX: (x) => {
+      sprite.x = clampX(x);
     },
   };
 }

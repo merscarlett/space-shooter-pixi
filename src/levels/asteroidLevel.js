@@ -8,18 +8,19 @@ import { createExplosion } from '../game/explosion';
 import { setupPlayerControls } from '../game/controls';
 import { updateBulletsAndCollisions } from '../game/collision';
 import { showMenu } from '../game/menu';
+import { clearScene, registerSceneCleanup } from '../game/scene';
 import { startBossLevel } from './bossLevel';
 
 export async function startAsteroidLevel(app) {
-  app.stage.removeChildren();
-  await createBackground(app);
+  clearScene(app);
+  registerSceneCleanup(app, await createBackground(app));
 
   const showIntro = createLevelIntro(app);
   await showIntro('ASTEROID LEVEL');
 
   const maxBullets = 10;
   const timeLeft = 60;
-  const { timerText, getRemainingTime, updateBullets } = createHUD(
+  const { getRemainingTime, updateBullets, updateTimer } = createHUD(
     app,
     maxBullets,
     timeLeft
@@ -36,15 +37,18 @@ export async function startAsteroidLevel(app) {
   const gameEnded = { value: false };
   const shotsFired = { value: 0 };
 
-  setupPlayerControls(
+  registerSceneCleanup(
     app,
-    player,
-    bullets,
-    maxBullets,
-    readyToShoot,
-    shotsFired,
-    updateBullets,
-    gameEnded
+    setupPlayerControls(
+      app,
+      player,
+      bullets,
+      maxBullets,
+      readyToShoot,
+      shotsFired,
+      updateBullets,
+      gameEnded
+    )
   );
 
   const asteroids = [];
@@ -57,27 +61,28 @@ export async function startAsteroidLevel(app) {
     asteroids.push(asteroid);
   }
 
-  app.ticker.add(() => {
+  const showGameOver = async () => {
+    clearScene(app);
+    registerSceneCleanup(app, await createBackground(app));
+    showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+  };
+
+  const tickerCallback = () => {
     if (gameEnded.value) return;
 
     const remaining = getRemainingTime();
-    timerText.text = `Time: ${remaining}`;
+    updateTimer(remaining);
     if (remaining <= 0) {
       gameEnded.value = true;
-      showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+      void showGameOver();
       return;
     }
 
-    updateBulletsAndCollisions(
-      bullets,
-      asteroids,
-      (a) => {
-        createExplosion(app, a.sprite.x, a.sprite.y);
-        asteroidContainer.removeChild(a.sprite);
-        asteroids.splice(asteroids.indexOf(a), 1);
-      },
-      app
-    );
+    updateBulletsAndCollisions(bullets, asteroids, (a) => {
+      createExplosion(app, a.sprite.x, a.sprite.y);
+      asteroidContainer.removeChild(a.sprite);
+      asteroids.splice(asteroids.indexOf(a), 1);
+    });
 
     if (
       shotsFired.value >= maxBullets &&
@@ -85,14 +90,19 @@ export async function startAsteroidLevel(app) {
       asteroids.length > 0
     ) {
       gameEnded.value = true;
-      showMenu(app, 'YOU LOSE', 'New Game', () => startAsteroidLevel(app));
+      void showGameOver();
+      return;
     }
 
     if (asteroids.length === 0 && !gameEnded.value) {
       gameEnded.value = true;
-      setTimeout(() => startBossLevel(app), 300);
+      const bossTimeout = setTimeout(() => startBossLevel(app), 300);
+      registerSceneCleanup(app, () => clearTimeout(bossTimeout));
     }
 
     asteroids.forEach((a) => a.update());
-  });
+  };
+
+  app.ticker.add(tickerCallback);
+  registerSceneCleanup(app, () => app.ticker.remove(tickerCallback));
 }

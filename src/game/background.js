@@ -41,7 +41,7 @@ export async function createBackground(app) {
     });
   }
 
-  app.ticker.add(() => {
+  const updateStars = () => {
     stars.forEach((s) => {
       const star = s.sprite;
       star.y += s.speed;
@@ -54,5 +54,11 @@ export async function createBackground(app) {
       if (star.alpha > 1) star.alpha = 1;
       if (star.alpha < 0.3) star.alpha = 0.3;
     });
-  });
+  };
+
+  app.ticker.add(updateStars);
+
+  return () => {
+    app.ticker.remove(updateStars);
+  };
 }

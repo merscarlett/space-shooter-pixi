@@ -1,12 +1,26 @@
-import js from "@eslint/js";
-import prettier from "eslint-plugin-prettier/recommended";
+import js from '@eslint/js';
+import prettier from 'eslint-plugin-prettier/recommended';
 
-export default {
-  extends: [js.configs.recommended, prettier],
-  ignorePatterns: ["dist"],
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
+export default [
+  {
+    ignores: ['dist/**'],
   },
-  rules: {},
-};
+  js.configs.recommended,
+  prettier,
+  {
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        document: 'readonly',
+        performance: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearInterval: 'readonly',
+        clearTimeout: 'readonly',
+        window: 'readonly',
+      },
+    },
+    rules: {},
+  },
+];

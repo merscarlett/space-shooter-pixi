@@ -10,13 +10,13 @@ export function createBullet(app, x, y, speedY = -5) {
   bullet.y = y;
   bullet.filters = [new BlurFilter({ strength: 2 })];
   app.stage.addChild(bullet);
-  
+
   return {
     sprite: bullet,
     update: () => {
       bullet.y += speedY;
       if (bullet.y < 0 || bullet.y > app.screen.height) {
-        app.stage.removeChild(bullet);
+        bullet.parent?.removeChild(bullet);
         return false;
       }
       return true;
